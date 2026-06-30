@@ -358,20 +358,45 @@ document.querySelectorAll('#form-panel input, #form-panel textarea').forEach(el 
 
 // ---------- PDF EXPORT ----------
 document.getElementById('btn-download').addEventListener('click', () => {
-  const element = document.getElementById('preview-document');
+  const original = document.getElementById('preview-document');
   const nomor = (val('f-nomor') || 'berita-acara').replace(/[\/\\]/g, '_').replace(/\s+/g, '_');
   const nama = (val('f-namakebutuhan') || '').replace(/[\/\\]/g, '_').replace(/\s+/g, '_');
   const filename = `${nomor}${nama ? '_' + nama : ''}.pdf`;
+
+  // Clone the node and place it outside the scrollable/clipped container,
+  // so html2canvas captures the FULL document instead of just the visible/scrolled portion.
+  const clone = original.cloneNode(true);
+  clone.id = 'preview-document-clone';
+  clone.style.position = 'fixed';
+  clone.style.top = '0';
+  clone.style.left = '-99999px';
+  clone.style.margin = '0';
+  clone.style.boxShadow = 'none';
+  document.body.appendChild(clone);
+
+  const btn = document.getElementById('btn-download');
+  btn.disabled = true;
+  btn.innerText = 'Sedang membuat PDF...';
 
   const opt = {
     margin: 0,
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: clone.scrollWidth, windowHeight: clone.scrollHeight },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
-  html2pdf().set(opt).from(element).save();
+
+  html2pdf().set(opt).from(clone).save().then(() => {
+    document.body.removeChild(clone);
+    btn.disabled = false;
+    btn.innerText = 'Download PDF';
+  }).catch((err) => {
+    document.body.removeChild(clone);
+    btn.disabled = false;
+    btn.innerText = 'Download PDF';
+    alert('Gagal membuat PDF: ' + err);
+  });
 });
 
 // ---------- INIT ----------
