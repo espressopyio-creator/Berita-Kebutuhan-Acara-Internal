@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Berita Acara Kebutuhan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  body { font-family: 'Times New Roman', Times, serif; }
+  .ui-font { font-family: Arial, Helvetica, sans-serif; }
+  #preview-document { font-family: 'Times New Roman', Times, serif; }
+  .doc-table th, .doc-table td { border: 1px solid #000; }
+  @media print {
+    body * { visibility: hidden; }
+  }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen ui-font">
+
+<header class="bg-slate-800 text-white py-4 px-6 shadow">
+  <h1 class="text-xl font-semibold">Generator Berita Acara Kebutuhan</h1>
+  <p class="text-slate-300 text-sm">Isi form di kiri, lihat hasil real-time di kanan, lalu unduh PDF</p>
+</header>
+
+<main class="max-w-[1500px] mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+
+  <!-- ================= FORM PANEL ================= -->
+  <section class="bg-white rounded-lg shadow p-5 space-y-6" id="form-panel">
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">Header Dokumen</h2>
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-slate-600">Nomor Berita Acara</label>
+        <input type="text" id="f-nomor" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="086/GM-KUT/KPU/BUS-02/VI/2026">
+
+        <label class="block text-sm font-medium text-slate-600">Ref. Tanggal</label>
+        <input type="text" id="f-reftanggal" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="(boleh kosong)">
+
+        <label class="block text-sm font-medium text-slate-600">Nama Kebutuhan</label>
+        <input type="text" id="f-namakebutuhan" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Biaya Service Kendaraan Motor Project DMD">
+
+        <label class="block text-sm font-medium text-slate-600">Penanggung Jawab</label>
+        <input type="text" id="f-penanggungjawab" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Divisi Telco & Power Engineering">
+      </div>
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">1. Pertimbangan</h2>
+      <p class="text-xs text-slate-500 mb-1">Setiap baris baru otomatis jadi bullet point.</p>
+      <textarea id="f-pertimbangan" rows="3" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Sehubungan dengan adanya biaya service kendaraan motor project DMD
+Maka Divisi Telco & Power Engineering mengajukan biaya kegiatan ini dengan pembebanan pada project berikut :"></textarea>
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">Tabel Project</h2>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs font-medium text-slate-600">Regional</label>
+          <input type="text" id="f-regional" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Jabo">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600">Project</label>
+          <input type="text" id="f-project" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="DMD">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600">No ID Project</label>
+          <input type="text" id="f-noidproject" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="PRJ-KUT-KPU-TPED-2026-04-00071">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600">Periode Penggunaan</label>
+          <input type="text" id="f-periode" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Juni 2026">
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-bold text-slate-700">2. Spesifikasi Kebutuhan</h2>
+        <button id="btn-add-row" type="button" class="text-xs bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded">+ Tambah Baris</button>
+      </div>
+      <div id="spec-rows" class="space-y-2"></div>
+      <div class="mt-2 text-right text-sm font-semibold text-slate-700">
+        Grand Total: <span id="grandtotal-display">Rp 0</span>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">4. Waktu Penggunaan</h2>
+      <input type="text" id="f-waktu" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Juni 2026">
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">5. Distribusi Penggunaan</h2>
+      <input type="text" id="f-distribusi" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Kantor Pusat">
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">Lokasi & Tanggal Penandatanganan</h2>
+      <input type="text" id="f-lokasitanggal" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Jakarta, 30 Juni 2026">
+    </div>
+
+    <div>
+      <h2 class="font-bold text-slate-700 mb-2">Penandatangan</h2>
+      <div class="grid grid-cols-1 gap-3">
+        <div class="border rounded p-2">
+          <p class="text-xs font-semibold text-slate-500 mb-1">Diajukan oleh</p>
+          <input type="text" id="f-ttd1-nama" class="w-full border rounded px-3 py-1.5 text-sm mb-1" placeholder="Nama">
+          <input type="text" id="f-ttd1-jabatan" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Jabatan">
+        </div>
+        <div class="border rounded p-2">
+          <p class="text-xs font-semibold text-slate-500 mb-1">Disetujui oleh</p>
+          <input type="text" id="f-ttd2-nama" class="w-full border rounded px-3 py-1.5 text-sm mb-1" placeholder="Nama">
+          <input type="text" id="f-ttd2-jabatan" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Jabatan">
+        </div>
+        <div class="border rounded p-2">
+          <p class="text-xs font-semibold text-slate-500 mb-1">Mengetahui</p>
+          <input type="text" id="f-ttd3-nama" class="w-full border rounded px-3 py-1.5 text-sm mb-1" placeholder="Nama">
+          <input type="text" id="f-ttd3-jabatan" class="w-full border rounded px-3 py-1.5 text-sm" placeholder="Jabatan">
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-download" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded">
+      Download PDF
+    </button>
+  </section>
+
+  <!-- ================= PREVIEW PANEL ================= -->
+  <section class="lg:sticky lg:top-4 self-start">
+    <div class="bg-slate-200 rounded-lg p-4 overflow-auto" style="max-height: 90vh;">
+      <div id="preview-document" class="bg-white mx-auto shadow text-[12px] leading-snug" style="width:210mm; min-height:297mm; padding:20mm; box-sizing:border-box;">
+
+        <h1 class="text-center font-bold underline text-[15px]">BERITA ACARA KEBUTUHAN</h1>
+        <p class="text-center italic" id="p-nomor">Nomor : </p>
+
+        <div class="mt-4 mb-2" id="header-fields"></div>
+
+        <div id="section-1" class="mb-3"></div>
+
+        <table class="doc-table w-full border-collapse mb-3 text-center" style="border:1px solid #000;">
+          <thead>
+            <tr style="background:#D9E2F3;">
+              <th class="p-1" style="width:6%;">NO</th>
+              <th class="p-1" style="width:14%;">REGIONAL</th>
+              <th class="p-1" style="width:20%;">PROJECT</th>
+              <th class="p-1" style="width:40%;">NO ID PROJECT</th>
+              <th class="p-1" style="width:20%;">Periode Penggunaan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-1" id="pv-projno">1</td>
+              <td class="p-1" id="pv-regional"></td>
+              <td class="p-1" id="pv-project"></td>
+              <td class="p-1" id="pv-noidproject"></td>
+              <td class="p-1" id="pv-periode"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="mb-2"><span class="font-bold">2.&nbsp; Spesifikasi Kebutuhan</span></div>
+        <table class="doc-table w-full border-collapse mb-3 text-center" style="border:1px solid #000;">
+          <thead>
+            <tr style="background:#D9E2F3;">
+              <th class="p-1" style="width:6%;">No</th>
+              <th class="p-1" style="width:24%;">Nama Kebutuhan</th>
+              <th class="p-1" style="width:35%;">Budget</th>
+              <th class="p-1" style="width:17%;">Estimasi Kebutuhan</th>
+              <th class="p-1" style="width:18%;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="pv-spec-rows"></tbody>
+          <tfoot>
+            <tr style="background:#D9E2F3;">
+              <td class="p-1 font-bold" colspan="4">Grand Total</td>
+              <td class="p-1 font-bold" id="pv-grandtotal"></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="mb-2"><span class="font-bold">3.&nbsp; Perkiraan Total Harga</span></div>
+        <div class="mb-3 pl-5">&bull; <span id="pv-perkiraan"></span></div>
+
+        <div class="mb-2"><span class="font-bold">4.&nbsp; Waktu Penggunaan</span></div>
+        <div class="mb-3 pl-5">&bull; <span id="pv-waktu"></span></div>
+
+        <div class="mb-2"><span class="font-bold">5.&nbsp; Distribusi Penggunaan</span></div>
+        <div class="mb-6 pl-5">&bull; <span id="pv-distribusi"></span></div>
+
+        <div class="mb-8" id="pv-lokasitanggal"></div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p>Diajukan oleh,</p>
+            <div style="height:60px;"></div>
+            <p class="font-bold underline" id="pv-ttd1-nama">&nbsp;</p>
+            <p id="pv-ttd1-jabatan">&nbsp;</p>
+          </div>
+          <div>
+            <p>Disetujui oleh,</p>
+            <div style="height:60px;"></div>
+            <p class="font-bold underline" id="pv-ttd2-nama">&nbsp;</p>
+            <p id="pv-ttd2-jabatan">&nbsp;</p>
+          </div>
+        </div>
+
+        <div class="text-center mt-10">
+          <p>Mengetahui,</p>
+          <div style="height:60px;"></div>
+          <p class="font-bold underline" id="pv-ttd3-nama">&nbsp;</p>
+          <p id="pv-ttd3-jabatan">&nbsp;</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ---------- STATE ----------
+let specRows = [
+  { nama: 'Biaya Service Kendaraan Motor', budget: '', estimasi: 0 }
+];
+
+// ---------- HELPERS ----------
+function formatRupiah(num) {
+  if (isNaN(num)) num = 0;
+  return num.toLocaleString('id-ID');
+}
+function parseNumber(str) {
+  if (!str) return 0;
+  const cleaned = String(str).replace(/[^0-9]/g, '');
+  return cleaned ? parseInt(cleaned, 10) : 0;
+}
+function bulletize(text) {
+  if (!text) return '';
+  return text.split('\n').filter(l => l.trim() !== '').map(l => `<div class="pl-5">&bull; ${escapeHtml(l)}</div>`).join('');
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.innerText = str;
+  return div.innerHTML;
+}
+function val(id) { return document.getElementById(id).value; }
+
+// ---------- RENDER FORM ROWS ----------
+function renderFormRows() {
+  const container = document.getElementById('spec-rows');
+  container.innerHTML = '';
+  specRows.forEach((row, idx) => {
+    const div = document.createElement('div');
+    div.className = 'border rounded p-2 space-y-1';
+    div.innerHTML = `
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-slate-500">Item ${idx + 1}</span>
+        <button type="button" data-idx="${idx}" class="btn-remove-row text-xs text-red-600 hover:text-red-800 ${specRows.length <= 1 ? 'invisible' : ''}">Hapus</button>
+      </div>
+      <input type="text" class="w-full border rounded px-3 py-1.5 text-sm row-nama" data-idx="${idx}" placeholder="Nama Kebutuhan" value="${escapeAttr(row.nama)}">
+      <input type="text" class="w-full border rounded px-3 py-1.5 text-sm row-budget" data-idx="${idx}" placeholder="Budget (cth: PRJ-KUT-KPU-TPED-2026-04-00071)" value="${escapeAttr(row.budget)}">
+      <input type="text" class="w-full border rounded px-3 py-1.5 text-sm row-estimasi" data-idx="${idx}" placeholder="Estimasi Kebutuhan (angka)" value="${row.estimasi ? formatRupiah(row.estimasi) : ''}">
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('.row-nama').forEach(el => el.addEventListener('input', e => {
+    specRows[e.target.dataset.idx].nama = e.target.value;
+    renderPreview();
+  }));
+  container.querySelectorAll('.row-budget').forEach(el => el.addEventListener('input', e => {
+    specRows[e.target.dataset.idx].budget = e.target.value;
+    renderPreview();
+  }));
+  container.querySelectorAll('.row-estimasi').forEach(el => el.addEventListener('input', e => {
+    const num = parseNumber(e.target.value);
+    specRows[e.target.dataset.idx].estimasi = num;
+    e.target.value = num ? formatRupiah(num) : '';
+    renderPreview();
+  }));
+  container.querySelectorAll('.btn-remove-row').forEach(el => el.addEventListener('click', e => {
+    const idx = parseInt(e.target.dataset.idx, 10);
+    if (specRows.length > 1) {
+      specRows.splice(idx, 1);
+      renderFormRows();
+      renderPreview();
+    }
+  }));
+}
+function escapeAttr(str) {
+  return (str || '').replace(/"/g, '&quot;');
+}
+
+document.getElementById('btn-add-row').addEventListener('click', () => {
+  specRows.push({ nama: '', budget: '', estimasi: 0 });
+  renderFormRows();
+  renderPreview();
+});
+
+// ---------- RENDER PREVIEW ----------
+function renderPreview() {
+  document.getElementById('p-nomor').innerText = 'Nomor : ' + val('f-nomor');
+
+  const headerHtml = `
+    <table class="text-[12px]">
+      <tr><td class="align-top pr-2" style="width:140px;">Ref. Tanggal</td><td class="align-top pr-1">:</td><td class="align-top">${escapeHtml(val('f-reftanggal'))}</td></tr>
+      <tr><td class="align-top pr-2">Nama Kebutuhan</td><td class="align-top pr-1">:</td><td class="align-top">${escapeHtml(val('f-namakebutuhan'))}</td></tr>
+      <tr><td class="align-top pr-2">Penanggung jawab</td><td class="align-top pr-1">:</td><td class="align-top border-b border-black pb-1" style="border-bottom:1px solid #000;">${escapeHtml(val('f-penanggungjawab'))}</td></tr>
+    </table>`;
+  document.getElementById('header-fields').innerHTML = headerHtml;
+
+  document.getElementById('section-1').innerHTML = `
+    <span class="font-bold">1.&nbsp; Pertimbangan</span>
+    ${bulletize(val('f-pertimbangan'))}
+  `;
+
+  document.getElementById('pv-regional').innerText = val('f-regional');
+  document.getElementById('pv-project').innerText = val('f-project');
+  document.getElementById('pv-noidproject').innerText = val('f-noidproject');
+  document.getElementById('pv-periode').innerText = val('f-periode');
+
+  // Spec table
+  const tbody = document.getElementById('pv-spec-rows');
+  tbody.innerHTML = '';
+  let grandTotal = 0;
+  specRows.forEach((row, idx) => {
+    grandTotal += row.estimasi;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-1">${idx + 1}</td>
+      <td class="p-1">${escapeHtml(row.nama)}</td>
+      <td class="p-1">${escapeHtml(row.budget)}</td>
+      <td class="p-1">${formatRupiah(row.estimasi)}</td>
+      <td class="p-1">${formatRupiah(row.estimasi)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('pv-grandtotal').innerText = formatRupiah(grandTotal);
+  document.getElementById('grandtotal-display').innerText = 'Rp ' + formatRupiah(grandTotal);
+  document.getElementById('pv-perkiraan').innerText = 'Rp' + formatRupiah(grandTotal) + ',-';
+
+  document.getElementById('pv-waktu').innerText = val('f-waktu');
+  document.getElementById('pv-distribusi').innerText = val('f-distribusi');
+  document.getElementById('pv-lokasitanggal').innerText = val('f-lokasitanggal');
+
+  document.getElementById('pv-ttd1-nama').innerText = val('f-ttd1-nama') || '\u00A0';
+  document.getElementById('pv-ttd1-jabatan').innerText = val('f-ttd1-jabatan') || '\u00A0';
+  document.getElementById('pv-ttd2-nama').innerText = val('f-ttd2-nama') || '\u00A0';
+  document.getElementById('pv-ttd2-jabatan').innerText = val('f-ttd2-jabatan') || '\u00A0';
+  document.getElementById('pv-ttd3-nama').innerText = val('f-ttd3-nama') || '\u00A0';
+  document.getElementById('pv-ttd3-jabatan').innerText = val('f-ttd3-jabatan') || '\u00A0';
+}
+
+// ---------- EVENT BINDING ----------
+document.querySelectorAll('#form-panel input, #form-panel textarea').forEach(el => {
+  el.addEventListener('input', renderPreview);
+});
+
+// ---------- PDF EXPORT ----------
+document.getElementById('btn-download').addEventListener('click', () => {
+  const element = document.getElementById('preview-document');
+  const nomor = (val('f-nomor') || 'berita-acara').replace(/[\/\\]/g, '_').replace(/\s+/g, '_');
+  const nama = (val('f-namakebutuhan') || '').replace(/[\/\\]/g, '_').replace(/\s+/g, '_');
+  const filename = `${nomor}${nama ? '_' + nama : ''}.pdf`;
+
+  const opt = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+  html2pdf().set(opt).from(element).save();
+});
+
+// ---------- INIT ----------
+renderFormRows();
+renderPreview();
+</script>
+
+</body>
+</html>
